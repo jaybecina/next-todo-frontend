@@ -15,23 +15,11 @@ import {
 } from '@/components/ui/dropdown-menu'
 import ThemeToggler from './ThemeToggler'
 import { useTheme } from 'next-themes'
-import { logout } from '@/services/authService'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
+import useLogout from '@/hooks/useLogout'
 
 const Navbar = () => {
   const { theme } = useTheme()
-  const router = useRouter()
-
-  const handleLogout = async () => {
-    try {
-      await logout()
-      router.push('/auth')
-    } catch (error) {
-      console.error('Logout failed:', error)
-      toast.error('An error occurred during logout.')
-    }
-  }
+  const handleLogout = useLogout()
 
   return (
     <div className="bg-primary dark:bg-slate-700 text-white py-2 px-5 flex justify-between">
