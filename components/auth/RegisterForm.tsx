@@ -21,12 +21,9 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { register } from '@/services/authService'
-import { toast } from 'sonner'
-import axios from 'axios'
+import { handleRegister } from '@/actions/authActions'
 import { useState } from 'react'
 import { Eye, EyeOff, Loader } from 'lucide-react'
-import CustomAlert from '@/components/ui/CustomAlert'
 
 const formSchema = z
   .object({
@@ -56,7 +53,6 @@ const formSchema = z
 const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
 
@@ -72,26 +68,11 @@ const RegisterForm = () => {
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSubmitting(true)
-    try {
-      await register(data.name, data.email, data.password)
-      console.log('Registration successful')
+    const result = await handleRegister(data.name, data.email, data.password)
+    if (result.success) {
       router.push('/')
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const message =
-          error.response?.data?.message ||
-          'An error occurred during registration'
-        setErrorMessage(message)
-        toast.error(message)
-      } else {
-        console.error('Unexpected error:', error)
-        const message = 'An unexpected error occurred'
-        setErrorMessage(message)
-        toast.error(message)
-      }
-    } finally {
-      setIsSubmitting(false)
     }
+    setIsSubmitting(false)
   }
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword)
@@ -105,14 +86,6 @@ const RegisterForm = () => {
         <CardDescription>Sign up by adding the info below</CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
-        {errorMessage && (
-          <CustomAlert
-            variant="destructive"
-            className="border-red-500"
-            title="Error"
-            description={errorMessage}
-          />
-        )}
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}

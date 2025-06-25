@@ -21,12 +21,9 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { login } from '@/services/authService'
-import { toast } from 'sonner'
-import axios from 'axios'
+import { handleLogin } from '@/actions/authActions'
 import { Eye, EyeOff, Loader } from 'lucide-react'
 import { useState } from 'react'
-import CustomAlert from '@/components/ui/CustomAlert'
 
 const formSchema = z.object({
   email: z
@@ -44,7 +41,6 @@ const formSchema = z.object({
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
 
@@ -58,25 +54,11 @@ const LoginForm = () => {
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSubmitting(true)
-    try {
-      const response = await login(data.email, data.password)
-      console.log('Login successful:', response)
+    const result = await handleLogin(data.email, data.password)
+    if (result.success) {
       router.push('/')
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const message =
-          error.response?.data?.message || 'An error occurred during login'
-        setErrorMessage(message)
-        toast.error(message)
-      } else {
-        console.error('Unexpected error:', error)
-        const message = 'An unexpected error occurred'
-        setErrorMessage(message)
-        toast.error(message)
-      }
-    } finally {
-      setIsSubmitting(false)
     }
+    setIsSubmitting(false)
   }
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword)
@@ -90,14 +72,6 @@ const LoginForm = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
-        {errorMessage && (
-          <CustomAlert
-            variant="destructive"
-            className="border-red-500"
-            title="Error"
-            description={errorMessage}
-          />
-        )}
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
