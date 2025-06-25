@@ -1,10 +1,10 @@
-"use client";
+'use client'
 
-import Image from "next/image";
-import Link from "next/link";
-import logoWhite from "../assets/img/logo-white.png";
-import logoDark from "../assets/img/logo.png";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import Image from 'next/image'
+import Link from 'next/link'
+import logoWhite from '../assets/img/logo-white.png'
+import logoDark from '../assets/img/logo.png'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,17 +12,32 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import ThemeToggler from "./ThemeToggler";
-import { useTheme } from "next-themes";
+} from '@/components/ui/dropdown-menu'
+import ThemeToggler from './ThemeToggler'
+import { useTheme } from 'next-themes'
+import { logout } from '@/services/authService'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 const Navbar = () => {
-  const { theme } = useTheme();
+  const { theme } = useTheme()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      router.push('/auth')
+    } catch (error) {
+      console.error('Logout failed:', error)
+      toast.error('An error occurred during logout.')
+    }
+  }
+
   return (
     <div className="bg-primary dark:bg-slate-700 text-white py-2 px-5 flex justify-between">
       <Link href="/">
         <Image
-          src={theme === "dark" ? logoWhite : logoDark}
+          src={theme === 'dark' ? logoWhite : logoDark}
           alt="Logo"
           width={40}
           priority
@@ -44,14 +59,12 @@ const Navbar = () => {
             <DropdownMenuItem>
               <Link href="/profile">Profile</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Link href="/auth">Logout</Link>
-            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Navbar;
+export default Navbar

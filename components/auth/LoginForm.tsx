@@ -20,10 +20,12 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useRouter } from 'next/navigation'
-import { handleLogin } from '@/actions/authActions'
 import { Eye, EyeOff, Loader } from 'lucide-react'
 import { useState } from 'react'
+import CustomAlert from '@/components/ui/CustomAlert'
+import useErrorHandler from '@/hooks/useErrorHandler'
+import useLoginHandler from '@/hooks/useLoginHandler'
+import { login } from '@/services/authService'
 
 const formSchema = z.object({
   email: z
@@ -42,7 +44,8 @@ const formSchema = z.object({
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const router = useRouter()
+  const { error, handleError, handleUnexpectedError } = useErrorHandler()
+  const { handleSuccessfulLogin } = useLoginHandler()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,11 +57,22 @@ const LoginForm = () => {
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSubmitting(true)
-    const result = await handleLogin(data.email, data.password)
-    if (result.success) {
-      router.push('/')
+
+    try {
+      const result = await login(data.email, data.password)
+
+      if (result.token && result.user) {
+        handleSuccessfulLogin(result)
+      } else if (result.message) {
+        handleError(result.message, result.details)
+      } else {
+        handleUnexpectedError(new Error('Unexpected response format'))
+      }
+    } catch (err) {
+      handleUnexpectedError(err)
+    } finally {
+      setIsSubmitting(false)
     }
-    setIsSubmitting(false)
   }
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword)
@@ -126,6 +140,8 @@ const LoginForm = () => {
                 </FormItem>
               )}
             />
+
+            {error && <CustomAlert title="Error" description={error} />}
 
             <Button className="w-full" disabled={isSubmitting}>
               {isSubmitting ? (

@@ -1,3 +1,5 @@
+'use client'
+
 import ThemeToggler from '@/components/ThemeToggler'
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'

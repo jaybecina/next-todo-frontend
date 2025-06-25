@@ -21,9 +21,11 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { handleRegister } from '@/actions/authActions'
+import { register } from '@/services/authService'
 import { useState } from 'react'
 import { Eye, EyeOff, Loader } from 'lucide-react'
+import { toast } from 'sonner'
+import CustomAlert from '@/components/ui/CustomAlert'
 
 const formSchema = z
   .object({
@@ -54,6 +56,7 @@ const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -68,9 +71,14 @@ const RegisterForm = () => {
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSubmitting(true)
-    const result = await handleRegister(data.name, data.email, data.password)
+    setError(null)
+    const result = await register(data.name, data.email, data.password)
     if (result.success) {
+      toast.success(result.message || 'Registration successful')
       router.push('/')
+    } else {
+      toast.error(result.message || 'Registration failed')
+      setError(result.message || 'Registration failed')
     }
     setIsSubmitting(false)
   }
@@ -190,6 +198,9 @@ const RegisterForm = () => {
                 </FormItem>
               )}
             />
+
+            {error && <CustomAlert title="Error" description={error} />}
+
             <Button className="w-full" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>

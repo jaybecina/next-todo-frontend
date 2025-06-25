@@ -9,12 +9,19 @@ export const login = async (email: string, password: string) => {
       email,
       password,
     })
-    const { token } = response.data
+    const { token, user } = response.data
+
     useAuthStore.getState().setToken(token)
+    useAuthStore.getState().setUser(user)
+
     return response.data
   } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return error.response.data
+    }
+
     console.error('Login failed:', error)
-    throw error
+    return { message: 'An unexpected error occurred', details: '' }
   }
 }
 
@@ -31,11 +38,39 @@ export const register = async (
     })
     return response.data
   } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return error.response.data
+    }
+
     console.error('Registration failed:', error)
-    throw error
+    return { message: 'An unexpected error occurred', details: '' }
   }
 }
 
-export const logout = () => {
-  useAuthStore.getState().clearToken()
+export const logout = async () => {
+  try {
+    const token = useAuthStore.getState().token
+    if (!token) {
+      throw new Error('No authentication token found')
+    }
+
+    await axios.post(
+      `${API_URL}/api/auth/logout`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    useAuthStore.getState().clearToken()
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return error.response.data
+    }
+
+    console.error('Logout failed:', error)
+    return { message: 'An unexpected error occurred', details: '' }
+  }
 }
