@@ -73,7 +73,7 @@ const RegisterForm = () => {
     setIsSubmitting(true)
     setError(null)
     const result = await register(data.name, data.email, data.password)
-    if (result.success) {
+    if (result.token || result.user) {
       toast.success(result.message || 'Registration successful')
       router.push('/')
     } else {
