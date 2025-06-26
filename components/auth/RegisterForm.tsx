@@ -20,7 +20,6 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useRouter } from 'next/navigation'
 import { register } from '@/services/authService'
 import { useState } from 'react'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
@@ -57,7 +56,6 @@ const RegisterForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -72,14 +70,24 @@ const RegisterForm = () => {
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSubmitting(true)
     setError(null)
+
     const result = await register(data.name, data.email, data.password)
-    if (result.token || result.user) {
-      toast.success(result.message || 'Registration successful')
-      router.push('/')
+
+    if (result.user) {
+      // Show success toast
+      toast.success(
+        'Registration successful! You can now log in to your account.'
+      )
+
+      // Show success alert
+      setError(
+        'Your account has been successfully registered. Please log in to access your account.'
+      )
     } else {
       toast.error(result.message || 'Registration failed')
       setError(result.message || 'Registration failed')
     }
+
     setIsSubmitting(false)
   }
 
@@ -199,7 +207,15 @@ const RegisterForm = () => {
               )}
             />
 
-            {error && <CustomAlert title="Error" description={error} />}
+            {error && (
+              <CustomAlert
+                title={error.includes('successfully') ? 'Success' : 'Error'}
+                description={error}
+                variant={
+                  error.includes('successfully') ? 'default' : 'destructive'
+                }
+              />
+            )}
 
             <Button className="w-full" disabled={isSubmitting}>
               {isSubmitting ? (

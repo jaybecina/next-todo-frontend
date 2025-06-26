@@ -2,9 +2,9 @@ import { create } from 'zustand'
 
 interface AuthState {
   token: string | null
-  user: { id: string; email: string } | null
+  user: { id: string; email: string; name: string } | null // Added `name` property to user
   setToken: (token: string) => void
-  setUser: (user: { id: string; email: string }) => void
+  setUser: (user: { id: string; email: string; name: string }) => void // Updated `setUser` to include `name`
   clearToken: () => void
 }
 
@@ -21,7 +21,7 @@ const useAuthStore = create<AuthState>(
       }
       set({ token })
     },
-    setUser: (user: { id: string; email: string }) => {
+    setUser: (user: { id: string; email: string; name: string }) => {
       if (typeof window !== 'undefined') {
         localStorage.setItem('user', JSON.stringify(user)) // Persist user to localStorage
       }

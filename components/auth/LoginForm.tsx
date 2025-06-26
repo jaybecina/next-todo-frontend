@@ -141,7 +141,13 @@ const LoginForm = () => {
               )}
             />
 
-            {error && <CustomAlert title="Error" description={error} />}
+            {error && (
+              <CustomAlert
+                title="Error"
+                description={error}
+                variant="destructive"
+              />
+            )}
 
             <Button className="w-full" disabled={isSubmitting}>
               {isSubmitting ? (

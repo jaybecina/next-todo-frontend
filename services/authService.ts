@@ -36,6 +36,7 @@ export const register = async (
       email,
       password,
     })
+
     return response.data
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
