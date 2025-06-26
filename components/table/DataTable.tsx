@@ -1,3 +1,13 @@
+'use client'
+
+import React from 'react'
+import {
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
+  ColumnDef,
+} from '@tanstack/react-table'
 import {
   Table,
   TableBody,
@@ -5,68 +15,81 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  TableCaption,
-} from "@/components/ui/table";
-import Link from "next/link";
-import { todos } from "@/data/todos";
-import { Todo } from "@/types/todoTypes";
+} from '@/components/ui/table'
+import TablePagination from '@/components/table/TablePagination'
 
-interface TodoTableProps {
-  limit?: number;
-  title?: string;
+interface DataTableProps<TData> {
+  columns: ColumnDef<TData>[]
+  data: TData[]
 }
 
-const DataTable = ({ limit, title }: TodoTableProps) => {
-  // Sort todos in descending order based on createdAt
-  const sortedTodos: Todo[] = [...todos].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+const DataTable = <TData,>({ columns, data }: DataTableProps<TData>) => {
+  const table = useReactTable({
+    data: data || [],
+    columns: columns || [],
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  })
 
-  // Filter todos to limit
-  const filteredTodos = limit ? sortedTodos.slice(0, limit) : sortedTodos;
+  const headerGroups = table.getHeaderGroups() || []
 
   return (
-    <div className="mt-10">
-      <h3 className="text-2xl mb-4 font-semibold">{title ? title : "Todos"}</h3>
+    <div className="rounded-md border">
       <Table>
-        <TableCaption>A list of your todos</TableCaption>
         <TableHeader>
-          <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead className="hidden md:table-cell">Description</TableHead>
-            <TableHead className="hidden md:table-cell">Status</TableHead>
-            <TableHead className="hidden md:table-cell text-right">
-              Created At
-            </TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredTodos.map((todo) => (
-            <TableRow key={todo.id}>
-              <TableCell>{todo.title}</TableCell>
-              <TableCell className="hidden md:table-cell">
-                {todo.description}
-              </TableCell>
-              <TableCell className="hidden md:table-cell">
-                {todo.completed ? "Completed" : "Pending"}
-              </TableCell>
-              <TableCell className="text-right hidden md:table-cell">
-                {new Date(todo.createdAt).toLocaleDateString()}
-              </TableCell>
-              <TableCell>
-                <Link href={`/todos/edit/${todo.id}`}>
-                  <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-xs">
-                    Edit
-                  </button>
-                </Link>
+          {headerGroups.length > 0 ? (
+            headerGroups.map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns?.length} className="h-24 text-center">
+                No headers available.
               </TableCell>
             </TableRow>
-          ))}
+          )}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns?.length} className="h-24 text-center">
+                No results.
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
+      <TablePagination
+        currentPage={table.getState().pagination.pageIndex + 1}
+        totalPages={table.getPageCount()}
+        onPreviousPage={() => table.previousPage()}
+        onNextPage={() => table.nextPage()}
+        canPreviousPage={table.getCanPreviousPage()}
+        canNextPage={table.getCanNextPage()}
+      />
     </div>
-  );
-};
+  )
+}
 
-export default DataTable;
+export default DataTable

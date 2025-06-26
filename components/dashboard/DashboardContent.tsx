@@ -1,9 +1,9 @@
 'use client'
 
 import DashboardCard from '@/components/dashboard/DashboardCard'
-import DataTable from '@/components/table/DataTable'
 import AnalyticsChart from '@/components/dashboard/AnalyticsChart'
 import { CheckCircle2, Clock, ListTodo, RotateCcw } from 'lucide-react'
+import useAuthStore from '@/store/authStore'
 
 const DashboardContent = ({
   totalTodos,
@@ -16,6 +16,9 @@ const DashboardContent = ({
   pendingTodos: number
   recentTodos: number
 }) => {
+  const authStoreData = useAuthStore()
+  console.log('Auth Store Data:', authStoreData)
+
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 px-0 py-4">
@@ -41,7 +44,6 @@ const DashboardContent = ({
         />
       </div>
       <AnalyticsChart />
-      <DataTable title="Latest Todos" limit={5} />
     </>
   )
 }

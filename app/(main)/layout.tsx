@@ -9,6 +9,7 @@ import AuthGuard from '@/components/auth/AuthGuard'
 import useAuthStore from '@/store/authStore'
 import useLogout from '@/hooks/useLogout'
 import { jwtDecode } from 'jwt-decode'
+import Cookies from 'js-cookie'
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const { token } = useAuthStore()
@@ -18,15 +19,21 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     const checkTokenValidity = () => {
       if (token) {
         try {
+          const tokenParts = token.split('.')
+          if (tokenParts.length !== 3) {
+            throw new Error('Invalid token format')
+          }
+
           const decodedToken: { exp: number } = jwtDecode(token)
-          console.log('Decoded Token:', decodedToken)
           const currentTime = Math.floor(Date.now() / 1000)
 
           if (decodedToken.exp < currentTime) {
+            Cookies.remove('authToken')
             handleLogout()
           }
         } catch (error) {
           console.error('Token decoding failed:', error)
+          Cookies.remove('authToken')
           handleLogout()
         }
       }
