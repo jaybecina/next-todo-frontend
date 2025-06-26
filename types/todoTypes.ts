@@ -23,3 +23,7 @@ export interface TodoCreate {
   description: string
   completed?: boolean
 }
+
+export interface TodoResponse {
+  todo: Todo
+}
