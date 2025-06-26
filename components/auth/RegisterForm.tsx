@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { register } from '@/services/authService'
 import { useState } from 'react'
-import { Eye, EyeOff, Loader } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import CustomAlert from '@/components/ui/CustomAlert'
 
@@ -205,7 +205,7 @@ const RegisterForm = () => {
               {isSubmitting ? (
                 <>
                   Submitting...
-                  <Loader className="ml-2 animate-spin" />
+                  <Loader2 className="ml-2 animate-spin" />
                 </>
               ) : (
                 'Sign Up'

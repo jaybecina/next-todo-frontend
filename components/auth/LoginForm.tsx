@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Eye, EyeOff, Loader } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import CustomAlert from '@/components/ui/CustomAlert'
 import useErrorHandler from '@/hooks/useErrorHandler'
@@ -147,7 +147,7 @@ const LoginForm = () => {
               {isSubmitting ? (
                 <>
                   Submitting...
-                  <Loader className="ml-2 animate-spin" />
+                  <Loader2 className="ml-2 animate-spin" />
                 </>
               ) : (
                 'Sign In'
