@@ -8,8 +8,6 @@ const useLogout = () => {
   const handleLogout = async () => {
     try {
       await logout()
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
       router.push('/auth')
     } catch (error) {
       console.error('Logout failed:', error)
