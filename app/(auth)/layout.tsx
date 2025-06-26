@@ -1,6 +1,8 @@
-import ThemeToggler from "@/components/ThemeToggler";
-import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
+'use client'
+
+import ThemeToggler from '@/components/ThemeToggler'
+import { Toaster } from '@/components/ui/sonner'
+import { ThemeProvider } from '@/components/providers/ThemeProvider'
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -16,9 +18,9 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
         {children}
       </div>
-      <Toaster />
+      <Toaster richColors />
     </ThemeProvider>
-  );
-};
+  )
+}
 
-export default AuthLayout;
+export default AuthLayout
