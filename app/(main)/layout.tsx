@@ -8,7 +8,7 @@ import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import AuthGuard from '@/components/auth/AuthGuard'
 import useAuthStore from '@/store/authStore'
 import useLogout from '@/hooks/useLogout'
-import { jwtDecode } from 'jwt-decode'
+import jwtDecode from 'jwt-decode'
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const { token } = useAuthStore()
