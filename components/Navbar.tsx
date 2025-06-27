@@ -2,8 +2,10 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import logoWhite from '../assets/img/logo-white.png'
-import logoDark from '../assets/img/logo.png'
+import { useTheme } from 'next-themes'
+import { useState } from 'react'
+import { Loader2 } from 'lucide-react'
+
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -13,10 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import ThemeToggler from './ThemeToggler'
-import { useTheme } from 'next-themes'
 import useLogout from '@/hooks/useLogout'
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -25,13 +24,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Loader2 } from 'lucide-react'
+import useAuthStore from '@/store/authStore'
+
+import logoDark from '../assets/img/logo.png'
+import logoWhite from '../assets/img/logo-white.png'
+
+import ThemeToggler from './ThemeToggler'
 
 const Navbar = () => {
   const { theme } = useTheme()
   const handleLogout = useLogout()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const user = useAuthStore(
+    (state: { user: { email: string } | null }) => state.user
+  )
 
   const confirmLogout = async () => {
     setIsLoggingOut(true)
@@ -61,7 +68,7 @@ const Navbar = () => {
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuLabel>{user ? user.email : 'Guest'}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <Link href="/profile">Profile</Link>

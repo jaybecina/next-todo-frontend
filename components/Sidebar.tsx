@@ -1,3 +1,6 @@
+import { LayoutDashboard, ListTodo } from 'lucide-react'
+import Link from 'next/link'
+
 import {
   Command,
   CommandEmpty,
@@ -5,19 +8,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
-  CommandShortcut,
-} from "@/components/ui/command";
-import {
-  LayoutDashboard,
-  ListTodo,
-  CheckCircle,
-  Clock,
-  RefreshCw,
-  Settings,
-  User,
-} from "lucide-react";
-import Link from "next/link";
+} from '@/components/ui/command'
 
 const Sidebar = () => {
   return (
@@ -32,39 +23,12 @@ const Sidebar = () => {
           </CommandItem>
           <CommandItem>
             <ListTodo className="mr-2 h-4 w-4" />
-            <Link href="/todos">All Todos</Link>
-          </CommandItem>
-          <CommandItem>
-            <CheckCircle className="mr-2 h-4 w-4" />
-            <Link href="/todos/completed">Completed</Link>
-          </CommandItem>
-          <CommandItem>
-            <Clock className="mr-2 h-4 w-4" />
-            <Link href="/todos/pending">Pending</Link>
-          </CommandItem>
-          <CommandItem>
-            <RefreshCw className="mr-2 h-4 w-4" />
-            <Link href="/todos/recent">Recent</Link>
-          </CommandItem>
-        </CommandGroup>
-
-        <CommandSeparator />
-
-        <CommandGroup heading="Settings">
-          <CommandItem>
-            <User className="mr-2 h-4 w-4" />
-            <span>Profile</span>
-            <CommandShortcut>⌘P</CommandShortcut>
-          </CommandItem>
-          <CommandItem>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
-            <CommandShortcut>⌘S</CommandShortcut>
+            <Link href="/todos">Todos</Link>
           </CommandItem>
         </CommandGroup>
       </CommandList>
     </Command>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar

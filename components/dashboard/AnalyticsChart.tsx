@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react'
 import {
   LineChart,
   Line,
@@ -10,14 +10,16 @@ import {
   ResponsiveContainer,
   Tooltip,
   Legend,
-} from "recharts";
+} from 'recharts'
+import moment from 'moment'
+
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card'
 import {
   Select,
   SelectContent,
@@ -25,27 +27,93 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-
-import data from "@/data/analytics";
+} from '@/components/ui/select'
+import { getAllTodos } from '@/services/todoService'
+import useAuthStore from '@/store/authStore'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const availableFilters = [
   {
-    value: "completed",
-    label: "Completed Todos",
+    value: 'completed',
+    label: 'Completed Todos',
   },
   {
-    value: "pending",
-    label: "Pending Todos",
+    value: 'pending',
+    label: 'Pending Todos',
   },
   {
-    value: "total",
-    label: "Total Todos",
+    value: 'total',
+    label: 'Total Todos',
   },
-];
+]
 
-const AnalyticsChart = () => {
-  const [selection, setSelection] = useState("total");
+interface MonthlyStats {
+  name: string
+  completed: number
+  pending: number
+  total: number
+}
+
+const AnalyticsChart = ({ isLoading }: { isLoading: boolean }) => {
+  const [selection, setSelection] = useState('total')
+  const [chartData, setChartData] = useState<MonthlyStats[]>([])
+  const token = useAuthStore((state) => state.token)
+
+  useEffect(() => {
+    const fetchTodos = async () => {
+      if (!token) {
+        console.error('No authentication token found')
+        return
+      }
+
+      try {
+        const { todos } = await getAllTodos(token)
+
+        if (todos.length === 0) {
+          const fallbackData = Array.from({ length: 3 }, (_, index) => {
+            const date = moment().subtract(index, 'months')
+            return {
+              name: date.format('MMM YYYY'),
+              completed: 0,
+              pending: 0,
+              total: 0,
+            }
+          }).reverse()
+
+          setChartData(fallbackData)
+        } else {
+          const monthlyStats = todos.reduce<Record<string, MonthlyStats>>(
+            (acc, todo) => {
+              const date = new Date(todo.createdAt)
+              const month = date.toLocaleString('default', { month: 'short' })
+              const year = date.getFullYear()
+              const key = `${month} ${year}`
+
+              if (!acc[key]) {
+                acc[key] = { name: key, completed: 0, pending: 0, total: 0 }
+              }
+
+              acc[key].total++
+              if (todo.completed) {
+                acc[key].completed++
+              } else {
+                acc[key].pending++
+              }
+
+              return acc
+            },
+            {}
+          )
+
+          setChartData(Object.values(monthlyStats))
+        }
+      } catch (error) {
+        console.error('Error fetching todos:', error)
+      }
+    }
+
+    fetchTodos()
+  }, [token])
 
   return (
     <Card>
@@ -70,27 +138,67 @@ const AnalyticsChart = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <div style={{ width: "100%", height: 300 }}>
-          <ResponsiveContainer>
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey={selection}
-                stroke="#8884d8"
-                strokeWidth={2}
-                dot={{ r: 4 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+        <div style={{ width: '100%', height: 300 }}>
+          {isLoading ? (
+            <Skeleton className="w-full h-full" />
+          ) : (
+            <ResponsiveContainer>
+              <LineChart data={chartData}>
+                <defs>
+                  <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis
+                  label={{
+                    value: 'Number of Todos',
+                    angle: -90,
+                    position: 'insideLeft',
+                  }}
+                />
+                <Tooltip
+                  content={({ payload }) => {
+                    if (!payload || payload.length === 0) return null
+                    const { name, completed, pending, total } =
+                      payload[0].payload
+                    return (
+                      <div
+                        style={{
+                          backgroundColor: '#fff',
+                          padding: '10px',
+                          border: '1px solid #ccc',
+                        }}
+                      >
+                        <p>
+                          <strong>{name}</strong>
+                        </p>
+                        <p>Completed: {completed}</p>
+                        <p>Pending: {pending}</p>
+                        <p>Total: {total}</p>
+                      </div>
+                    )
+                  }}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey={selection}
+                  stroke="#8884d8"
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                  fillOpacity={1}
+                  fill="url(#colorTotal)"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 
-export default AnalyticsChart;
+export default AnalyticsChart

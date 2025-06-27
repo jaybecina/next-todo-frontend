@@ -1,8 +1,9 @@
 'use client'
 
+import { CheckCircle2, Clock, ListTodo, RotateCcw } from 'lucide-react'
+
 import DashboardCard from '@/components/dashboard/DashboardCard'
 import AnalyticsChart from '@/components/dashboard/AnalyticsChart'
-import { CheckCircle2, Clock, ListTodo, RotateCcw } from 'lucide-react'
 import useAuthStore from '@/store/authStore'
 
 const DashboardContent = ({
@@ -10,11 +11,13 @@ const DashboardContent = ({
   completedTodos,
   pendingTodos,
   recentTodos,
+  isLoading,
 }: {
   totalTodos: number
   completedTodos: number
   pendingTodos: number
   recentTodos: number
+  isLoading: boolean
 }) => {
   const authStoreData = useAuthStore()
   console.log('Auth Store Data:', authStoreData)
@@ -26,24 +29,28 @@ const DashboardContent = ({
           title="Total Todos"
           count={totalTodos}
           icon={<ListTodo className="text-blue-500" size={72} />}
+          isLoading={isLoading}
         />
         <DashboardCard
           title="Completed"
           count={completedTodos}
           icon={<CheckCircle2 className="text-green-500" size={72} />}
+          isLoading={isLoading}
         />
         <DashboardCard
           title="Pending"
           count={pendingTodos}
           icon={<Clock className="text-yellow-500" size={72} />}
+          isLoading={isLoading}
         />
         <DashboardCard
           title="Recent (7 days)"
           count={recentTodos}
           icon={<RotateCcw className="text-purple-500" size={72} />}
+          isLoading={isLoading}
         />
       </div>
-      <AnalyticsChart />
+      <AnalyticsChart isLoading={isLoading} />
     </>
   )
 }
