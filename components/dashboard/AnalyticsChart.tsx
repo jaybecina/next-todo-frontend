@@ -69,44 +69,45 @@ const AnalyticsChart = ({ isLoading }: { isLoading: boolean }) => {
       try {
         const { todos } = await getAllTodos(token)
 
-        if (todos.length === 0) {
-          const fallbackData = Array.from({ length: 3 }, (_, index) => {
-            const date = moment().subtract(index, 'months')
-            return {
-              name: date.format('MMM YYYY'),
+        const monthlyStats = todos.reduce<Record<string, MonthlyStats>>(
+          (acc, todo) => {
+            const date = new Date(todo.createdAt)
+            const month = date.toLocaleString('default', { month: 'short' })
+            const year = date.getFullYear()
+            const key = `${month} ${year}`
+
+            if (!acc[key]) {
+              acc[key] = { name: key, completed: 0, pending: 0, total: 0 }
+            }
+
+            acc[key].total++
+            if (todo.completed) {
+              acc[key].completed++
+            } else {
+              acc[key].pending++
+            }
+
+            return acc
+          },
+          {}
+        )
+
+        const fallbackData = Array.from({ length: 3 }, (_, index) => {
+          const date = moment().subtract(index, 'months')
+          const key = date.format('MMM YYYY')
+          return (
+            monthlyStats[key] || {
+              name: key,
               completed: 0,
               pending: 0,
               total: 0,
             }
-          }).reverse()
-
-          setChartData(fallbackData)
-        } else {
-          const monthlyStats = todos.reduce<Record<string, MonthlyStats>>(
-            (acc, todo) => {
-              const date = new Date(todo.createdAt)
-              const month = date.toLocaleString('default', { month: 'short' })
-              const year = date.getFullYear()
-              const key = `${month} ${year}`
-
-              if (!acc[key]) {
-                acc[key] = { name: key, completed: 0, pending: 0, total: 0 }
-              }
-
-              acc[key].total++
-              if (todo.completed) {
-                acc[key].completed++
-              } else {
-                acc[key].pending++
-              }
-
-              return acc
-            },
-            {}
           )
+        }).reverse()
 
-          setChartData(Object.values(monthlyStats))
-        }
+        const processedChartData = Object.values(monthlyStats)
+        console.log('Processed chart data:', processedChartData)
+        setChartData(fallbackData)
       } catch (error) {
         console.error('Error fetching todos:', error)
       }
@@ -141,7 +142,7 @@ const AnalyticsChart = ({ isLoading }: { isLoading: boolean }) => {
         <div style={{ width: '100%', height: 300 }}>
           {isLoading ? (
             <Skeleton className="w-full h-full" />
-          ) : (
+          ) : chartData.length > 0 ? (
             <ResponsiveContainer>
               <LineChart data={chartData}>
                 <defs>
@@ -194,6 +195,8 @@ const AnalyticsChart = ({ isLoading }: { isLoading: boolean }) => {
                 />
               </LineChart>
             </ResponsiveContainer>
+          ) : (
+            <p>No data available for the selected metric.</p>
           )}
         </div>
       </CardContent>

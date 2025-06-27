@@ -1,9 +1,14 @@
+import { cookies } from 'next/headers'
+
 import DashboardClient from '@/components/dashboard/DashboardClient'
 import AuthGuard from '@/components/auth/AuthGuard'
 import { getAllTodos } from '@/services/todoService'
 
 export default async function Home() {
-  const token = process.env.NEXT_PUBLIC_API_TOKEN // Replace with server-side token retrieval logic
+  const cookieStore = await cookies()
+  const token = cookieStore.get('authToken')?.value || ''
+
+  console.log('Retrieved token:', token)
 
   if (!token) {
     console.error('No authentication token found')
@@ -21,6 +26,8 @@ export default async function Home() {
 
   try {
     const { todos } = await getAllTodos(token)
+    console.log('API response todos:', todos)
+
     const totalTodos = todos.length
     const completedTodos = todos.filter((todo) => todo.completed).length
     const pendingTodos = todos.filter((todo) => !todo.completed).length
